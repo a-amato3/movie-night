@@ -1,20 +1,35 @@
+import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { of } from 'rxjs';
-import { movies } from '../models/movie.model'
+import { Observable, of } from 'rxjs';
+import { delay } from 'rxjs/operators';
+import { Movie, movies } from '../models/movie.model';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class MovieService {
+  private ROOT_URL = 'http://localhost:3000/movies';
 
-  constructor() { }
+  constructor(private http: HttpClient) {}
 
-  getMovies(){
-    return of(movies)
+  addMovie(movie: Movie){
+    return this.http.post(this.ROOT_URL, movie)
   }
-  movie(id: number){
-    return of(
-      movies.find(movie => +movie.id === +id)
-      );
+
+  getMoviesFromHttp() {
+    return this.http.get<Movie[]>(this.ROOT_URL).pipe(this.addDelay);
+  }
+
+  movie(id: number) {
+    console.log(id);
+    return of(movies.find(movie => +movie.id === +id));
+  }
+
+  movieFromHttp(id: number) {
+    return this.http.get<Movie>(`${this.ROOT_URL}/${id}`);
+  }
+
+  addDelay(obs: Observable<any>) {
+    return obs.pipe(delay(1000));
   }
 }
